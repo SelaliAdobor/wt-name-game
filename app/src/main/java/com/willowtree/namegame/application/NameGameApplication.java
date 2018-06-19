@@ -8,6 +8,8 @@ import javax.inject.Inject;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;
+import timber.log.BuildConfig;
+import timber.log.Timber;
 
 
 public class NameGameApplication extends Application implements HasActivityInjector {
@@ -17,6 +19,9 @@ public class NameGameApplication extends Application implements HasActivityInjec
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Timber.plant(new Timber.DebugTree());
+
         DaggerApplicationComponent.create()
                 .inject(this);
     }
