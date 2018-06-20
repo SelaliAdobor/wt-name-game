@@ -3,11 +3,16 @@ package com.willowtree.namegame.application;
 import com.google.gson.GsonBuilder;
 import com.willowtree.namegame.BuildConfig;
 import com.willowtree.namegame.api.WillowtreeApiService;
+import com.willowtree.namegame.profiles.ProfileRepository;
+import com.willowtree.namegame.profiles.ProfileSource;
+import com.willowtree.namegame.profiles.RealmProfileRepository;
+import com.willowtree.namegame.profiles.WillowtreeApiProfileSource;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -47,4 +52,21 @@ public class ApplicationModule {
         return new OkHttpClient.Builder().addInterceptor(loggingInterceptor).build();
     }
 
+    @Provides
+    @Singleton
+    ProfileSource provideProfileSource(WillowtreeApiService apiService) {
+        return new WillowtreeApiProfileSource(apiService);
+    }
+
+    @Provides
+    @Singleton
+    Realm provideRealm() {
+        return Realm.getDefaultInstance();
+    }
+
+    @Provides
+    @Singleton
+    ProfileRepository provideProfileRepository(Realm realm) {
+        return new RealmProfileRepository(realm);
+    }
 }
