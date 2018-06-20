@@ -3,6 +3,8 @@ package com.willowtree.namegame;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.willowtree.namegame.screens.gamedata.GameDataFragment;
+
 import dagger.android.AndroidInjection;
 
 public class MainActivity extends AppCompatActivity {
@@ -13,5 +15,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         AndroidInjection.inject(this);
+
+        GameDataFragment gameDataFragment = GameDataFragment.create();
+        getSupportFragmentManager().beginTransaction().replace(android.R.id.content,gameDataFragment).commit();
     }
 }
