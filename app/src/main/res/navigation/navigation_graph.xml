@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/gameDataFragment">
+    <fragment
+        android:id="@+id/gameDataFragment"
+        android:name="com.willowtree.namegame.screens.gamedata.GameDataFragment"
+        android:label="gamedata_fragment"
+        tools:layout="@layout/gamedata_fragment" />
+</navigation>
