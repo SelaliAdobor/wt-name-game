@@ -19,10 +19,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
+import io.reactivex.disposables.Disposable;
 import io.realm.Realm;
 import timber.log.Timber;
 
 public class GameDataViewModel extends AndroidViewModel {
+
+    private Disposable loadingDisposable;
+
+
+
     @Inject
     ProfileSource profileSource;
 
@@ -42,7 +48,6 @@ public class GameDataViewModel extends AndroidViewModel {
     }
 
     private MutableLiveData<Throwable> loadingError = new MutableLiveData<>();
-    private MutableLiveData<Boolean> hasData = new MutableLiveData<>();
 
     public MutableLiveData<LoadingState> getLoadingState() {
         return loadingState;
@@ -63,19 +68,29 @@ public class GameDataViewModel extends AndroidViewModel {
 
 
     public void startLoading(int minimumDelayMs) {
+        if (loadingDisposable != null) {
+            //Only loads once per view model instance to allow leaving app and coming back without restarting load
+            return;
+        }
+
         //Minimum delay prevents confusing flash on screen
         //Logic would be contained in Presenter for traditional app
-        //TODO: Revisit logic, suspect delaySubscription should be zipWith so that network request starts immediately
+        //WouldDo: Revisit logic, suspect delaySubscription should be zipWith so that network request starts immediately
         loadingState.postValue(LoadingState.LOADING);
-        profileSource.getProfiles()
+        loadingDisposable = profileSource.getProfiles()
                 .delaySubscription(minimumDelayMs, TimeUnit.MILLISECONDS)
+                .flatMapCompletable(profiles -> profileRepository.setProfiles(profiles))
                 .subscribe(
-                        profiles ->
-                                profileRepository.setProfiles(profiles)
-                                        .subscribe(() -> loadingState.postValue(LoadingState.SUCCESS)),
+                        () -> loadingState.postValue(LoadingState.SUCCESS),
                         throwable -> {
                             loadingState.postValue(LoadingState.FAILED);
                             loadingError.postValue(throwable);
                         });
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        loadingDisposable.dispose();
     }
 }
