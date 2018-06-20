@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import com.willowtree.namegame.R;
 
+import androidx.navigation.fragment.NavHostFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -31,11 +32,6 @@ public class GameDataFragment extends Fragment {
     View offlineModeButton;
 
     GameDataViewModel gameDataViewModel;
-
-    public static GameDataFragment create() {
-        GameDataFragment gameDataFragment = new GameDataFragment();
-        return gameDataFragment;
-    }
 
     @Override
     public void onDestroyView() {
@@ -73,7 +69,7 @@ public class GameDataFragment extends Fragment {
                 failedContent.setVisibility(View.VISIBLE);
                 break;
             case SUCCESS:
-                //TODO
+                NavHostFragment.findNavController(this).navigate(R.id.action_goToMainMenuAfterGameDataLoad);
                 break;
         }
         offlineModeButton.setEnabled(gameDataViewModel.hasData());
@@ -90,7 +86,7 @@ public class GameDataFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View inflatedView = inflater.inflate(R.layout.gamedata_fragment, container, false);
-        ButterKnife.bind(this, inflatedView);
+        unbinder = ButterKnife.bind(this, inflatedView);
         return inflatedView;
     }
 }

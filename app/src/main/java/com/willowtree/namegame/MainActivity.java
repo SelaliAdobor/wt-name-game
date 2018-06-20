@@ -15,8 +15,5 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         AndroidInjection.inject(this);
-
-        GameDataFragment gameDataFragment = GameDataFragment.create();
-        getSupportFragmentManager().beginTransaction().replace(android.R.id.content,gameDataFragment).commit();
     }
 }

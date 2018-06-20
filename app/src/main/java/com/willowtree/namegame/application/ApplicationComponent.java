@@ -1,6 +1,7 @@
 package com.willowtree.namegame.application;
 
 import com.willowtree.namegame.screens.gamedata.GameDataViewModel;
+import com.willowtree.namegame.screens.mainmenu.MainMenuViewModel;
 
 import javax.inject.Singleton;
 
@@ -12,5 +13,8 @@ import dagger.android.AndroidInjectionModule;
 public interface ApplicationComponent {
     void inject(NameGameApplication nameGameApplication);
 
+    //Would use ViewModelFactory to support automatic injection
     void inject(GameDataViewModel gameDataViewModel);
+
+    void inject(MainMenuViewModel mainMenuViewModel);
 }

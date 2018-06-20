@@ -2,10 +2,26 @@
 <navigation xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/gameDataFragment">
+    app:startDestination="@id/mainMenuFragment">
     <fragment
         android:id="@+id/gameDataFragment"
         android:name="com.willowtree.namegame.screens.gamedata.GameDataFragment"
         android:label="gamedata_fragment"
-        tools:layout="@layout/gamedata_fragment" />
+        tools:layout="@layout/gamedata_fragment" >
+        <action
+            android:id="@+id/action_goToMainMenuAfterGameDataLoad"
+            app:destination="@id/mainMenuFragment"
+            app:launchSingleTop="true"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/mainMenuFragment"
+        android:name="com.willowtree.namegame.screens.mainmenu.MainMenuFragment"
+        android:label="main_menu_fragment"
+        tools:layout="@layout/main_menu_fragment" >
+        <action
+            android:id="@+id/action_goToGameDataLoadFromMainMenu"
+            app:destination="@id/gameDataFragment"
+            app:launchSingleTop="true"/>
+    </fragment>
 </navigation>

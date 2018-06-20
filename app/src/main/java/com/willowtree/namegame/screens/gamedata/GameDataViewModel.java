@@ -61,9 +61,11 @@ public class GameDataViewModel extends AndroidViewModel {
                 .blockingGet();
     }
 
-    public void startLoading(int minimumDelayMs) {
-        //Logic would be contained in Presenter for traditional app
 
+    public void startLoading(int minimumDelayMs) {
+        //Minimum delay prevents confusing flash on screen
+        //Logic would be contained in Presenter for traditional app
+        //TODO: Revisit logic, suspect delaySubscription should be zipWith so that network request starts immediately
         loadingState.postValue(LoadingState.LOADING);
         profileSource.getProfiles()
                 .delaySubscription(minimumDelayMs, TimeUnit.MILLISECONDS)
