@@ -1,6 +1,7 @@
 package com.willowtree.namegame.screens.mainmenu;
 
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +14,8 @@ import android.view.ViewGroup;
 
 import com.willowtree.namegame.R;
 import com.willowtree.namegame.screens.gamedata.GameDataViewModel;
+import com.willowtree.namegame.screens.namegame.NameGameFragment;
+import com.willowtree.namegame.screens.namegame.models.Game;
 
 import java.util.concurrent.TimeUnit;
 
@@ -39,8 +42,6 @@ public class MainMenuFragment extends Fragment {
         mainMenuViewModel = ViewModelProviders
                 .of(this)
                 .get(MainMenuViewModel.class);
-
-
     }
 
     @Override
@@ -54,8 +55,23 @@ public class MainMenuFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        if(!mainMenuViewModel.hasData()){
+        if (mainMenuViewModel.hasData()) {
+            startGame();
+        } else {
             NavHostFragment.findNavController(this).navigate(R.id.action_goToGameDataLoadFromMainMenu);
         }
+    }
+
+    @SuppressLint("CheckResult")
+    private void startGame() {
+
+        //noinspection ResultOfMethodCallIgnored
+        mainMenuViewModel.getGame(5)
+                .subscribe(game -> {
+                    Bundle bundle = new Bundle();
+
+                    bundle.putParcelable(NameGameFragment.ARGUMENTS_GAME_KEY, game);
+                    NavHostFragment.findNavController(this).navigate(R.id.action_mainMenuToMainGame, bundle);
+                });
     }
 }

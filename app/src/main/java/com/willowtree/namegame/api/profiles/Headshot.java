@@ -3,6 +3,7 @@ package com.willowtree.namegame.api.profiles;
 import com.google.gson.annotations.SerializedName;
 
 import io.realm.RealmObject;
+import java9.util.Optional;
 
 public class Headshot extends RealmObject {
     @SerializedName("type")
@@ -15,7 +16,14 @@ public class Headshot extends RealmObject {
         return type;
     }
 
-    public String getUrl() {
-        return url;
+    public Optional<String> getSanitizedUrl() {
+        if (url == null) {
+            return Optional.empty();
+        }
+        if (url.startsWith("//")) {
+            return Optional.of("http:" + url);
+        }
+
+        return Optional.of(url);
     }
 }

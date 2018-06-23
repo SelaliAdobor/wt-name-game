@@ -12,6 +12,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import dagger.internal.Factory;
 import io.realm.Realm;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -62,6 +63,12 @@ public class ApplicationModule {
     @Singleton
     Realm provideRealm() {
         return Realm.getDefaultInstance();
+    }
+
+    @Provides
+    @Singleton
+    Factory<Realm> provideRealmFactory() {
+        return Realm::getDefaultInstance;
     }
 
     @Provides
