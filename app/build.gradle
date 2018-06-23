@@ -114,6 +114,17 @@ dependencies {
     implementation "com.squareup.picasso:picasso:2.71828"
 
     implementation "com.github.anastr:speedviewlib:1.2.0"
+
+
+    implementation 'com.facebook.litho:litho-core:0.16.0'
+    implementation 'com.facebook.litho:litho-widget:0.16.0'
+    compileOnly 'com.facebook.litho:litho-annotations:0.16.0'
+
+    annotationProcessor 'com.facebook.litho:litho-processor:0.16.0'
+
+
+    implementation "com.github.charbgr:litho-picasso:1.0"
+
 }
 
 apply plugin: "com.squareup.sqldelight"

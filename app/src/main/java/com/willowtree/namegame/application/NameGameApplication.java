@@ -3,6 +3,7 @@ package com.willowtree.namegame.application;
 import android.app.Activity;
 import android.app.Application;
 
+import com.facebook.soloader.SoLoader;
 import com.willowtree.namegame.BuildConfig;
 
 import javax.inject.Inject;
@@ -28,6 +29,7 @@ public class NameGameApplication extends Application implements HasActivityInjec
     public void onCreate() {
         super.onCreate();
 
+        SoLoader.init(this, false);
         Realm.init(this);
         if (BuildConfig.DEBUG) {
             Realm.getDefaultInstance().executeTransaction(realm -> {
