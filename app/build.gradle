@@ -118,13 +118,18 @@ dependencies {
 
     implementation 'com.facebook.litho:litho-core:0.16.0'
     implementation 'com.facebook.litho:litho-widget:0.16.0'
+
     compileOnly 'com.facebook.litho:litho-annotations:0.16.0'
 
     annotationProcessor 'com.facebook.litho:litho-processor:0.16.0'
 
+    implementation 'com.facebook.litho:litho-sections-core:0.16.0'
+    implementation 'com.facebook.litho:litho-sections-widget:0.16.0'
 
-    implementation "com.github.charbgr:litho-picasso:1.0"
+    compileOnly 'com.facebook.litho:litho-sections-annotations:0.16.0'
 
+    annotationProcessor 'com.facebook.litho:litho-sections-processor:0.16.0'
 }
+
 
 apply plugin: "com.squareup.sqldelight"
