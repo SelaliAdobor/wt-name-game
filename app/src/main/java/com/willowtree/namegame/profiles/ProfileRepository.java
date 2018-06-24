@@ -33,9 +33,9 @@ public interface ProfileRepository {
                 });
     }
 
-    default Single<Game> getGame(int questionCount) {
-        return getChallenge(10)
-                .repeat(questionCount)
+    default Single<Game> getGame(int challengeCount, int profilesPerChallenge) {
+        return getChallenge(profilesPerChallenge)
+                .repeat(challengeCount)
                 .collectInto(new ArrayList<Challenge>(), ArrayList::add)
                 .map(Game::createGame);
     }

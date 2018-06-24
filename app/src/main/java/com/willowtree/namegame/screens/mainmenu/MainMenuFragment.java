@@ -66,7 +66,7 @@ public class MainMenuFragment extends Fragment {
     private void startGame() {
 
         //noinspection ResultOfMethodCallIgnored
-        mainMenuViewModel.getGame(5)
+        mainMenuViewModel.getGame(5, 9)
                 .subscribe(game -> {
                     Bundle bundle = new Bundle();
 
