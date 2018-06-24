@@ -62,10 +62,22 @@ public class NameGameViewModel extends AndroidViewModel {
         });
     }
 
-    public void loadProfileHeadshots() {
+    public void goToLoadState() {
+        if(getCurrentState() != null){
+            Timber.w("Not going to LOADING state due to existing state data");
+            return;
+        }
         stateData.setValue(State.LOADING);
 
-        List<Completable> profileHeadshotLoads = stream(getGame().getValue().challenges())
+        lifecycleDisposables.add(
+                Completable.merge(getHeadshotCompletables(getCurrentGame()))
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(() -> stateData.postValue(State.ANSWERING))
+        );
+    }
+
+    private List<Completable> getHeadshotCompletables(Game game) {
+        return stream(game.challenges())
                 .map(Challenge::profileIds)
                 .flatMap(StreamSupport::stream)
                 .map(profileIds -> profileRepository.getById(profileIds))
@@ -92,11 +104,6 @@ public class NameGameViewModel extends AndroidViewModel {
                             }
                         })
                 ).collect(Collectors.toList());
-        lifecycleDisposables.add(
-                Completable.merge(profileHeadshotLoads)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> stateData.postValue(State.ANSWERING))
-        );
     }
 
     public void addAnswer(Answer answer) {
