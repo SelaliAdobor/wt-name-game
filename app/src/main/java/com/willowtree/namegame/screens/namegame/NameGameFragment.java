@@ -111,7 +111,7 @@ public class NameGameFragment extends Fragment {
                 renderAnswering(game);
                 break;
             case SCORING:
-                loadingContent.setVisibility(View.VISIBLE);
+                loadingContent.setVisibility(View.GONE);
                 answeringContent.setVisibility(View.GONE);
                 scoringContent.setVisibility(View.VISIBLE);
                 renderScoring(game);

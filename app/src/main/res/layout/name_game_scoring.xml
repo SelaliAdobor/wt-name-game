@@ -22,6 +22,7 @@
         app:layout_constraintVertical_bias="0.497"
         app:sv_speedTextFormat="INTEGER"
         app:sv_unitUnderSpeedText="false"
+        app:sv_withTremble="false"
         app:sv_lowSpeedColor="@android:color/holo_green_dark"
         app:sv_mediumSpeedColor="@android:color/holo_green_dark"
         app:sv_highSpeedColor="@android:color/holo_green_dark"/>
