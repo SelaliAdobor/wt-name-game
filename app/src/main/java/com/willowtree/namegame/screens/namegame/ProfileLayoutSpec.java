@@ -12,8 +12,6 @@ import com.facebook.litho.annotations.LayoutSpec;
 import com.facebook.litho.annotations.OnCreateLayout;
 import com.facebook.litho.annotations.OnEvent;
 import com.facebook.litho.annotations.Prop;
-import com.facebook.litho.widget.Image;
-import com.facebook.litho.widget.Text;
 import com.facebook.yoga.YogaEdge;
 import com.willowtree.namegame.R;
 import com.willowtree.namegame.api.profiles.Profile;
@@ -36,6 +34,7 @@ public class ProfileLayoutSpec {
                                 .errorDrawableRes(R.drawable.unloaded_profile_image)
                                 .placeholderImageRes(R.drawable.unloaded_profile_image)
                 )
+                .clickHandler(ProfileLayout.onClick(c))
                 .build();
     }
 
