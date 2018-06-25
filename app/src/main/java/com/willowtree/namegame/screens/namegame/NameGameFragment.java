@@ -72,6 +72,9 @@ public class NameGameFragment extends Fragment {
     @BindView(R.id.namegame_scoring_label)
     TextView scoreLabel;
 
+    @BindView(R.id.namegame_answering_correctNameTextView)
+    TextView nameLabel;
+
     @BindView(R.id.namegame_scoring_konfettiView)
     KonfettiView konfettiView;
 
@@ -179,6 +182,13 @@ public class NameGameFragment extends Fragment {
 
 
                     updateRecyclerContent(recyclerBinder, componentContext, challenge);
+
+                    nameGameViewModel.profileRepository
+                            .getById(challenge.correctProfileId())
+                            .map(Profile::getFullName)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(correctName -> nameLabel.setText(correctName));
+
                 });
     }
 
