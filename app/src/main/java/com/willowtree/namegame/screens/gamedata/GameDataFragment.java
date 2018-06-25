@@ -52,7 +52,7 @@ public class GameDataFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        gameDataViewModel.startLoading(SUCCESS_DELAY_MS);
+        gameDataViewModel.startLoading(SUCCESS_DELAY_MS, false);
     }
 
     private void updateContentVisibility(GameDataViewModel.LoadingState loadingState) {
@@ -74,7 +74,7 @@ public class GameDataFragment extends Fragment {
 
     @OnClick(R.id.gamedata_retry_button)
     public void onGameDataRetryButton() {
-        gameDataViewModel.startLoading(SUCCESS_DELAY_MS);
+        gameDataViewModel.startLoading(SUCCESS_DELAY_MS, true);
     }
 
 

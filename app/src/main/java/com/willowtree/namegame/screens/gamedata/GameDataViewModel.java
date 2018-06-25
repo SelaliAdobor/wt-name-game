@@ -59,10 +59,13 @@ public class GameDataViewModel extends AndroidViewModel {
     }
 
 
-    public void startLoading(int minimumDelayMs) {
+    public void startLoading(int minimumDelayMs, boolean forcedLoading) {
         if (loadingDisposable != null) {
-            //Only loads once per view model instance to allow leaving app and coming back without restarting load
-            return;
+            loadingDisposable.isDisposed();
+            if(!forcedLoading){
+                //Only loads once per view model instance to allow leaving app and coming back without restarting load
+                return;
+            }
         }
 
         //Minimum delay prevents confusing flash on screen
