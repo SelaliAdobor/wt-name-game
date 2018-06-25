@@ -14,4 +14,9 @@ public class MainActivity extends AppCompatActivity {
 
         AndroidInjection.inject(this);
     }
+
+    @Override
+    public void onBackPressed() {
+        //Disable back button
+    }
 }
