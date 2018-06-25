@@ -8,4 +8,6 @@
     <color name="confetti_purple">#b48def</color>
     <color name="confetti_pink">#f4306d</color>
     <color name="score_gauge_color">#78866B</color>
+    <!-- Color used when showing a bio-->
+    <color name="answer_showcase_content_text_color">#FFFFFF</color>
 </resources>

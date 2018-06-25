@@ -1,10 +1,17 @@
 package com.willowtree.namegame.screens.namegame;
 
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StyleRes;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.text.TextPaint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +25,13 @@ import com.facebook.litho.widget.GridLayoutInfo;
 import com.facebook.litho.widget.Recycler;
 import com.facebook.litho.widget.RecyclerBinder;
 import com.facebook.litho.widget.RenderInfo;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
+import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.anastr.speedviewlib.SpeedView;
+import com.github.anastr.speedviewlib.Speedometer;
+import com.github.anastr.speedviewlib.TubeSpeedometer;
 import com.willowtree.namegame.R;
 import com.willowtree.namegame.api.profiles.Profile;
 import com.willowtree.namegame.screens.namegame.models.Answer;
@@ -26,9 +39,15 @@ import com.willowtree.namegame.screens.namegame.models.Challenge;
 import com.willowtree.namegame.screens.namegame.models.Game;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -50,7 +69,6 @@ import static java9.util.stream.StreamSupport.stream;
 public class NameGameFragment extends Fragment {
     Unbinder unbinder;
 
-
     public static final String ARGUMENTS_GAME_KEY = "game_key";
     private NameGameViewModel nameGameViewModel;
 
@@ -64,7 +82,7 @@ public class NameGameFragment extends Fragment {
     View scoringContent;
 
     @BindView(R.id.namegame_scoring_speedView)
-    SpeedView scoreView;
+    Speedometer scoreView;
 
     @BindView(R.id.namegame_answering_lithoView)
     LithoView lithoView;
@@ -96,6 +114,7 @@ public class NameGameFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
+        compositeDisposable.clear();
     }
 
     private void renderScoring(Game game) {
@@ -118,7 +137,7 @@ public class NameGameFragment extends Fragment {
         this.scoreLabel.setText(scoreLabel);
 
         if (allAnswersCorrect) {
-            startConfetti();
+            startConfetti(); //Very important!!
         }
     }
 
@@ -162,51 +181,71 @@ public class NameGameFragment extends Fragment {
         }
     }
 
+    RecyclerBinder recyclerBinder;
+    Recycler recyclerComponent;
+    ComponentContext componentContext;
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        componentContext = new ComponentContext(getActivity());
+
+        recyclerBinder = new RecyclerBinder.Builder()
+                .layoutInfo(new GridLayoutInfo(getActivity(), 3))
+                .build(componentContext);
+
+        recyclerComponent = Recycler.create(componentContext)
+                .binder(recyclerBinder)
+                .build();
+
+
+        lithoView.setComponent(recyclerComponent);
+    }
+
     private void renderAnswering(Game game) {
         game.firstUnansweredChallenge()
                 .ifPresent(challenge -> {
                     Timber.i("Current challenge: %s", challenge);
 
 
-                    ComponentContext componentContext = new ComponentContext(getActivity());
+                    updateRecyclerContent(challenge);
 
-                    RecyclerBinder recyclerBinder = new RecyclerBinder.Builder()
-                            .layoutInfo(new GridLayoutInfo(getActivity(), 3))
-                            .build(componentContext);
-
-                    Recycler recyclerComponent = Recycler.create(componentContext)
-                            .binder(recyclerBinder)
-                            .build();
-
-                    lithoView.setComponent(recyclerComponent);
-
-
-                    updateRecyclerContent(recyclerBinder, componentContext, challenge);
-
-                    nameGameViewModel.profileRepository
-                            .getById(challenge.correctProfileId())
-                            .map(Profile::getFullName)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(correctName -> nameLabel.setText(correctName));
+                    compositeDisposable.add(
+                            nameGameViewModel.profileRepository
+                                    .getById(challenge.correctProfileId())
+                                    .map(Profile::getFullName)
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(correctName -> nameLabel.setText(correctName))
+                    );
 
                 });
     }
 
-    private void updateRecyclerContent(RecyclerBinder recyclerBinder, ComponentContext componentContext, Challenge challenge) {
+    private void updateRecyclerContent(Challenge challenge) {
         List<RenderInfo> listItems = new ArrayList<>();
         compositeDisposable.add(
-                Single.merge(stream(challenge.profileIds())
-                        .map(profileId -> nameGameViewModel.profileRepository.getById(profileId))
-                        .collect(Collectors.toList()))
-                        .collectInto(new ArrayList<Profile>(), ArrayList::add)
+                Single.merge( //Create an Flowable that returns all the profiles that were found
+                        stream(challenge.profileIds())
+                                .map(profileId -> nameGameViewModel.profileRepository.getById(profileId))
+                                .collect(Collectors.toList())
+                )
+                        .collectInto(new ArrayList<Profile>(), ArrayList::add)//Collect all results of that observable into an array
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe((profiles) -> {
-                            for (Profile profile : profiles) {
 
+                            AtomicBoolean answerSelected = new AtomicBoolean(false);
+
+                            for (Profile profile : profiles) {
                                 Component layoutComponent = ProfileLayout
                                         .create(componentContext)
                                         .profile(profile)
-                                        .clickEventHandler(() -> handleAnswer(profile, challenge))
+                                        .clickEventHandler(() -> {
+                                            //We only want to be able to select an answer once per challenge
+                                            //Because the AtomicBoolean is scoped outside of this loop, it acts as shared state between all the buttons shown
+                                            if (!answerSelected.getAndSet(true)) {
+                                                handleAnswer(profiles, Answer.create(challenge, profile));
+                                            }
+                                        })
                                         .build();
 
                                 listItems.add(ComponentRenderInfo
@@ -214,6 +253,10 @@ public class NameGameFragment extends Fragment {
                                         .component(layoutComponent)
                                         .build()
                                 );
+
+                                if (profile.getId().equals(challenge.correctProfileId())) { //Won't run in release build due to Timber config
+                                    Timber.d("If you're playing, look away... the correct name is %d items down from the top", listItems.size());
+                                }
                             }
 
                             recyclerBinder.removeRangeAt(0, recyclerBinder.getItemCount());
@@ -222,8 +265,53 @@ public class NameGameFragment extends Fragment {
         );
     }
 
-    private void handleAnswer(Profile profileSelected, Challenge challenge) {
-        nameGameViewModel.addAnswer(Answer.create(challenge, profileSelected));
+    private void handleAnswer(List<Profile> profiles, Answer answer) {
+        compositeDisposable.add(
+                nameGameViewModel.profileRepository
+                        .getById(answer.challenge().correctProfileId())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(correctProfile -> {
+                            ViewTarget target = new ViewTarget(recyclerBinder
+                                    .getComponentAt(profiles.indexOf(correctProfile))
+                                    .getLithoView());//Can't be null since the view had to be clicked
+
+                            String styleTitle = answer.wasCorrect() ?
+                                    "Correct!" :
+                                    String.format("That's not %s...", correctProfile.getFirstName());
+
+                            //Show the profile's bio if available, otherwise show their job title
+                            //If neither is available, just show their full name
+                            String styleContent = answer.wasCorrect() ?
+                                    correctProfile
+                                            .getBio()
+                                            .or(correctProfile::getJobTitle)
+                                            .map(bioOrJobTitle -> bioOrJobTitle + "\n —" + correctProfile.getFirstName())
+                                            .orElse(correctProfile.getFullName()) :
+                                    String.format("You selected %s", answer.guessedProfile().getFullName());
+
+                            @StyleRes int showcaseStyle = answer.wasCorrect() ?
+                                    R.style.CorrectAnswerShowcaseTheme :
+                                    R.style.WrongAnswerShowcaseTheme;
+                            TextPaint textPaint = new TextPaint();
+                            int color = ContextCompat.getColor(getActivity(), R.color.answer_showcase_content_text_color);
+                            textPaint.setColor(color);
+                            ShowcaseView showcaseView = new ShowcaseView.Builder(getActivity())
+                                    .setTarget(target)
+                                    .setContentTitle(styleTitle)
+                                    .setContentText(styleContent)
+                                    .hideOnTouchOutside()
+                                    .setStyle(showcaseStyle)
+                                    .setContentTextPaint(textPaint)
+                                    .build();
+
+                            showcaseView.setOnShowcaseEventListener(new SimpleShowcaseEventListener() {
+                                @Override
+                                public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                                    nameGameViewModel.addAnswer(answer);
+                                }
+                            });
+                        })
+        );
     }
 
     private void renderLoading() {

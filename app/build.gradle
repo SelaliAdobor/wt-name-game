@@ -132,6 +132,7 @@ dependencies {
 
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.50'
     implementation 'nl.dionsegijn:konfetti:1.1.2'
+    implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
 }
 
 
