@@ -2,6 +2,8 @@ package com.willowtree.namegame.api.profiles;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Objects;
+
 import io.reactivex.annotations.Nullable;
 import io.realm.RealmList;
 import io.realm.RealmObject;
@@ -65,6 +67,41 @@ public class Profile extends RealmObject {
 
     public Optional<String> getBio() {
         return Optional.ofNullable(bio);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Profile profile = (Profile) o;
+        return Objects.equals(id, profile.id) &&
+                Objects.equals(type, profile.type) &&
+                Objects.equals(jobTitle, profile.jobTitle) &&
+                Objects.equals(firstName, profile.firstName) &&
+                Objects.equals(lastName, profile.lastName) &&
+                Objects.equals(bio, profile.bio) &&
+                Objects.equals(headshot, profile.headshot) &&
+                Objects.equals(socialLinks, profile.socialLinks);
+    }
+
+    @Override
+    public String toString() {
+        return "Profile{" +
+                "id='" + id + '\'' +
+                ", type='" + type + '\'' +
+                ", jobTitle='" + jobTitle + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", bio='" + bio + '\'' +
+                ", headshot=" + headshot +
+                ", socialLinks=" + socialLinks +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, type, jobTitle, firstName, lastName, bio, headshot, socialLinks);
     }
 
     public Optional<Headshot> getHeadshot() {
