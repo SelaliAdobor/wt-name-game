@@ -28,9 +28,6 @@ public class GameDataFragment extends Fragment {
     @BindView(R.id.gamedata_failed_content)
     View failedContent;
 
-    @BindView(R.id.gamedata_offline_mode_button)
-    View offlineModeButton;
-
     GameDataViewModel gameDataViewModel;
 
     @Override
@@ -72,7 +69,6 @@ public class GameDataFragment extends Fragment {
                 NavHostFragment.findNavController(this).navigate(R.id.action_goToMainMenuAfterGameDataLoad);
                 break;
         }
-        offlineModeButton.setEnabled(gameDataViewModel.hasData());
     }
 
 
