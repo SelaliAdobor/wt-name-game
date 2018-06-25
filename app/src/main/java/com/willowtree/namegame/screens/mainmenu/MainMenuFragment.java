@@ -14,6 +14,9 @@ import com.willowtree.namegame.R;
 import com.willowtree.namegame.screens.namegame.NameGameFragment;
 
 import androidx.navigation.fragment.NavHostFragment;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
 
 
 /**
@@ -22,6 +25,7 @@ import androidx.navigation.fragment.NavHostFragment;
 public class MainMenuFragment extends Fragment {
 
     MainMenuViewModel mainMenuViewModel;
+    private Unbinder unbinder;
 
     public MainMenuFragment() {
         // Required empty public constructor
@@ -39,16 +43,22 @@ public class MainMenuFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.main_menu_fragment, container, false);
+        View inflatedView = inflater.inflate(R.layout.main_menu_fragment, container, false);
+        unbinder = ButterKnife.bind(inflatedView);
+        return inflatedView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        if (mainMenuViewModel.hasData()) {
-            startGame();
-        } else {
+        if (!mainMenuViewModel.hasData()) {
             NavHostFragment.findNavController(this).navigate(R.id.action_goToGameDataLoadFromMainMenu);
         }
     }
@@ -64,5 +74,10 @@ public class MainMenuFragment extends Fragment {
                     bundle.putParcelable(NameGameFragment.ARGUMENTS_GAME_KEY, game);
                     NavHostFragment.findNavController(this).navigate(R.id.action_mainMenuToMainGame, bundle);
                 });
+    }
+
+    @OnClick(R.id.main_menu_play_button)
+    private void onMainMenuPlayButtonPressed() {
+        startGame();
     }
 }
