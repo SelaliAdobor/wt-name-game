@@ -10,4 +10,7 @@
         <item quantity="other">You got %d answers out of %d right</item>
     </plurals>
     <string name="namegame_scoring_guage_label_allCorrect">You got all the names right!</string>
+    <string name="namegame_scoring_few_title">You must be that new Android developer...</string>
+    <string name="namegame_scoring_some_title"> Not Bad!</string>
+    <string name="namegame_scoring_all_title">Awesome!</string>
 </resources>

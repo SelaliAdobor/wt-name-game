@@ -7,7 +7,9 @@
     <color name="confetti_orange">#ff726d</color>
     <color name="confetti_purple">#b48def</color>
     <color name="confetti_pink">#f4306d</color>
-    <color name="score_gauge_color">#78866B</color>
+    <color name="score_low_gauge_color">#C40033</color>
+    <color name="score_medium_gauge_color">#FFD300</color>
+    <color name="score_high_gauge_color">#00A368</color>
     <!-- Color used when showing a bio-->
     <color name="answer_showcase_content_text_color">#FFFFFF</color>
 </resources>
