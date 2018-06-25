@@ -13,18 +13,31 @@ import android.view.ViewGroup;
 import com.willowtree.namegame.R;
 import com.willowtree.namegame.screens.namegame.NameGameFragment;
 
+import java.util.List;
+
 import androidx.navigation.fragment.NavHostFragment;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import java9.util.Lists;
+import java9.util.stream.Collectors;
+import nl.dionsegijn.konfetti.KonfettiView;
+import nl.dionsegijn.konfetti.models.Shape;
+import nl.dionsegijn.konfetti.models.Size;
+
+import static java9.util.stream.StreamSupport.stream;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class MainMenuFragment extends Fragment {
+    @BindView(R.id.main_menu_konfettiView)
+    KonfettiView konfettiView;
 
     MainMenuViewModel mainMenuViewModel;
+
     private Unbinder unbinder;
 
     public MainMenuFragment() {
@@ -79,5 +92,23 @@ public class MainMenuFragment extends Fragment {
     @OnClick(R.id.main_menu_play_button)
     void onMainMenuPlayButtonPressed() {
         startGame();
+    }
+
+    @OnClick(R.id.main_menu_confetti_button)
+    void onConfettiButtonPressed() {
+        List<Integer> confettiColors = stream(Lists.of(R.color.confetti_yellow, R.color.confetti_orange, R.color.confetti_purple, R.color.confetti_pink))
+                .map(colorId -> getResources().getColor(colorId))
+                .collect(Collectors.toList());
+
+        konfettiView.build()
+                .addColors(confettiColors)
+                .setDirection(0.0, 359.0)
+                .setSpeed(1f, 5f)
+                .setFadeOutEnabled(true)
+                .setTimeToLive(2000L)
+                .addShapes(Shape.RECT, Shape.CIRCLE)
+                .addSizes(new Size(12, 5))
+                .setPosition(konfettiView.getX() + konfettiView.getWidth() / 2, konfettiView.getY() + konfettiView.getHeight() / 3)
+                .streamFor(50, 10000L);
     }
 }
