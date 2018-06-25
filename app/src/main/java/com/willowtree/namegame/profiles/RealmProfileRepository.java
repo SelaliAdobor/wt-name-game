@@ -66,7 +66,7 @@ public class RealmProfileRepository implements ProfileRepository {
     public Single<List<Profile>> getRandomProfiles(int count, boolean needHeadshots) {
         return Single.<List<Profile>>create(emitter ->
                 realm.executeTransactionAsync(transaction -> {
-                    
+
                     RealmResults<Profile> profiles = needHeadshots ?
                             transaction.where(Profile.class).isNotNull("headshot").isNotNull("headshot.url").findAll() :
                             transaction.where(Profile.class).findAll();

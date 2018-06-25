@@ -14,7 +14,6 @@ import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasActivityInjector;
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import timber.log.Timber;
 
 
@@ -26,6 +25,7 @@ public class NameGameApplication extends Application implements HasActivityInjec
     public ApplicationComponent getApplicationComponent() {
         return applicationComponent;
     }
+
     public static final int PICASSO_CACHE_SIZE_BYTES = 100000000; //Store up to 100MB of images
 
     @Override
@@ -43,7 +43,7 @@ public class NameGameApplication extends Application implements HasActivityInjec
         }
 
 
-        Picasso picasso =  new Picasso.Builder(this)
+        Picasso picasso = new Picasso.Builder(this)
                 .downloader(new OkHttp3Downloader(getCacheDir(), PICASSO_CACHE_SIZE_BYTES)).build();
         Picasso.setSingletonInstance(picasso);
 

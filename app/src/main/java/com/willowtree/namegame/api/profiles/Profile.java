@@ -38,7 +38,6 @@ public class Profile extends RealmObject {
     Headshot headshot;
 
 
-
     @SerializedName("socialLinks")
     @Nullable
     RealmList<SocialLink> socialLinks;
@@ -58,9 +57,11 @@ public class Profile extends RealmObject {
     public String getFirstName() {
         return firstName;
     }
+
     public String getFullName() {
         return firstName + " " + lastName;
     }
+
     public String getLastName() {
         return lastName;
     }

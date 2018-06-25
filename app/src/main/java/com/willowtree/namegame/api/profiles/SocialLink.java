@@ -4,15 +4,13 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
-import org.parceler.Parcel;
-
 import java.util.Objects;
 
 import io.realm.RealmObject;
 import java9.util.Optional;
 
 
-public class SocialLink extends RealmObject{
+public class SocialLink extends RealmObject {
     @SerializedName("type")
     String type;
 

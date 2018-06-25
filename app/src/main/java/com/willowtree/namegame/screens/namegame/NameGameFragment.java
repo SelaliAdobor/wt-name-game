@@ -1,9 +1,7 @@
 package com.willowtree.namegame.screens.namegame;
 
 
-import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,11 +27,8 @@ import com.facebook.litho.widget.RecyclerBinder;
 import com.facebook.litho.widget.RenderInfo;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
-import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
-import com.github.anastr.speedviewlib.SpeedView;
 import com.github.anastr.speedviewlib.Speedometer;
-import com.github.anastr.speedviewlib.TubeSpeedometer;
 import com.willowtree.namegame.R;
 import com.willowtree.namegame.api.profiles.Profile;
 import com.willowtree.namegame.screens.namegame.models.Answer;
@@ -41,26 +36,20 @@ import com.willowtree.namegame.screens.namegame.models.Challenge;
 import com.willowtree.namegame.screens.namegame.models.Game;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import io.reactivex.Completable;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import java9.util.Lists;
-import java9.util.stream.Collectors;
 
 import androidx.navigation.fragment.NavHostFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import java9.util.Lists;
+import java9.util.stream.Collectors;
 import nl.dionsegijn.konfetti.KonfettiView;
 import nl.dionsegijn.konfetti.models.Shape;
 import nl.dionsegijn.konfetti.models.Size;

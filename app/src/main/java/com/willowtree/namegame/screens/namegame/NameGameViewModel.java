@@ -16,20 +16,17 @@ import com.willowtree.namegame.screens.namegame.models.Challenge;
 import com.willowtree.namegame.screens.namegame.models.Game;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
 
 import io.reactivex.Completable;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import java9.util.Optional;
 import java9.util.stream.Collectors;
 import java9.util.stream.StreamSupport;
 import timber.log.Timber;
-
-import javax.inject.Inject;
 
 import static java9.util.stream.StreamSupport.stream;
 

@@ -3,16 +3,11 @@ package com.willowtree.namegame.screens.namegame.models;
 import android.os.Parcelable;
 
 import com.google.auto.value.AutoValue;
-import com.willowtree.namegame.api.profiles.Profile;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import java9.util.Optional;
-
-import java9.util.stream.Collectors;
 
 import static java9.util.stream.StreamSupport.stream;
 

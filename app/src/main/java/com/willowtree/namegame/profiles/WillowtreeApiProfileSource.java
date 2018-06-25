@@ -4,7 +4,6 @@ import com.willowtree.namegame.api.WillowtreeApiService;
 import com.willowtree.namegame.api.profiles.Profile;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;

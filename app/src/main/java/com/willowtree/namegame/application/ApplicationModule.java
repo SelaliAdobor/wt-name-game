@@ -26,7 +26,7 @@ public class ApplicationModule {
 
     @Provides
     @Singleton
-    WillowtreeApiService provideWillowtreeApiService(Retrofit retrofit){
+    WillowtreeApiService provideWillowtreeApiService(Retrofit retrofit) {
         return retrofit.create(WillowtreeApiService.class);
     }
 

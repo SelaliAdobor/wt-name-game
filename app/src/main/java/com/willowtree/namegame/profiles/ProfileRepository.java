@@ -5,7 +5,6 @@ import com.willowtree.namegame.screens.namegame.models.Challenge;
 import com.willowtree.namegame.screens.namegame.models.Game;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
