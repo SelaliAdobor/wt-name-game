@@ -223,9 +223,7 @@ public class NameGameFragment extends Fragment {
     }
 
     private void handleAnswer(Profile profileSelected, Challenge challenge) {
-        if (challenge.correctProfileId().equals(profileSelected.getId())) {
-            nameGameViewModel.addAnswer(Answer.create(challenge, profileSelected));
-        }
+        nameGameViewModel.addAnswer(Answer.create(challenge, profileSelected));
     }
 
     private void renderLoading() {
