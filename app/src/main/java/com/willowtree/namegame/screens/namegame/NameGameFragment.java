@@ -132,11 +132,25 @@ public class NameGameFragment extends Fragment {
 
         scoreView.speedTo(correctAnswers);
 
+        updateScoreText(totalAnswers, correctAnswers);
+
+        if (correctAnswers == totalAnswers) {
+            startConfetti(); //Very important!!
+        }
+    }
+
+    private void updateScoreText(int totalAnswers, int correctAnswers) {
         boolean allAnswersCorrect = correctAnswers == totalAnswers;
 
-        String scoreLabelText = allAnswersCorrect ?
-                getResources().getString(R.string.namegame_scoring_guage_label_allCorrect) :
-                getResources().getQuantityString(R.plurals.namegame_scoring_guage_label, correctAnswers, correctAnswers, totalAnswers);
+        String scoreLabelText;
+
+        if (allAnswersCorrect) {
+            scoreLabelText = getResources().getString(R.string.namegame_scoring_guage_label_allCorrect);
+        } else if (correctAnswers == 0) {
+            scoreLabelText = getResources().getString(R.string.namegame_scoring_guage_none_label);
+        } else {
+            scoreLabelText = getResources().getQuantityString(R.plurals.namegame_scoring_guage_label, correctAnswers, correctAnswers, totalAnswers);
+        }
 
         scoreLabel.setText(scoreLabelText);
 
@@ -152,11 +166,6 @@ public class NameGameFragment extends Fragment {
         }
 
         scoreTitle.setText(scoreTitleResId);
-
-        if (allAnswersCorrect) {
-            startConfetti(); //Very important!!
-        }
-
     }
 
     private void startConfetti() {
@@ -305,7 +314,7 @@ public class NameGameFragment extends Fragment {
     }
 
     private Completable highlightAnswer(List<Profile> profiles, Answer answer, Profile correctProfile) {
-        return Completable.create(emitter->{
+        return Completable.create(emitter -> {
             LithoView profileView = recyclerBinder
                     .getComponentAt(profiles.indexOf(correctProfile))
                     .getLithoView();
