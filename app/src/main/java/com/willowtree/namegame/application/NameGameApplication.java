@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Application;
 
 import com.facebook.soloader.SoLoader;
+import com.squareup.picasso.OkHttp3Downloader;
+import com.squareup.picasso.Picasso;
 import com.willowtree.namegame.BuildConfig;
 
 import javax.inject.Inject;
@@ -24,6 +26,7 @@ public class NameGameApplication extends Application implements HasActivityInjec
     public ApplicationComponent getApplicationComponent() {
         return applicationComponent;
     }
+    public static final int PICASSO_CACHE_SIZE_BYTES = 100000000; //Store up to 100MB of images
 
     @Override
     public void onCreate() {
@@ -38,6 +41,11 @@ public class NameGameApplication extends Application implements HasActivityInjec
 
             Timber.plant(new Timber.DebugTree());
         }
+
+
+        Picasso picasso =  new Picasso.Builder(this)
+                .downloader(new OkHttp3Downloader(getCacheDir(), PICASSO_CACHE_SIZE_BYTES)).build();
+        Picasso.setSingletonInstance(picasso);
 
         applicationComponent = DaggerApplicationComponent.create();
         applicationComponent
