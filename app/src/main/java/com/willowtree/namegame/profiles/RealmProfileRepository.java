@@ -1,6 +1,7 @@
 package com.willowtree.namegame.profiles;
 
 import com.willowtree.namegame.api.profiles.Profile;
+import com.willowtree.namegame.util.RealmUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,12 +64,16 @@ public class RealmProfileRepository implements ProfileRepository {
     }
 
     @Override
-    public Single<List<Profile>> getRandomProfiles(int count, boolean needHeadshots) {
+    public Single<List<Profile>> getRandomProfiles(int count, boolean needHeadshots, String... filteredHeadshotUrls) {
         return Single.<List<Profile>>create(emitter ->
                 realm.executeTransactionAsync(transaction -> {
 
                     RealmResults<Profile> profiles = needHeadshots ?
-                            transaction.where(Profile.class).isNotNull("headshot").isNotNull("headshot.url").findAll() :
+                            RealmUtil.excludeFieldValue(
+                                    transaction.where(Profile.class)
+                                            .isNotNull("headshot")
+                                            .isNotNull("headshot.url"), "headshot.url", filteredHeadshotUrls)
+                                    .findAll() :
                             transaction.where(Profile.class).findAll();
 
 

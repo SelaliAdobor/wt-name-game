@@ -44,7 +44,7 @@ public class MainMenuFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View inflatedView = inflater.inflate(R.layout.main_menu_fragment, container, false);
-        unbinder = ButterKnife.bind(inflatedView);
+        unbinder = ButterKnife.bind(this, inflatedView);
         return inflatedView;
     }
 
@@ -77,7 +77,7 @@ public class MainMenuFragment extends Fragment {
     }
 
     @OnClick(R.id.main_menu_play_button)
-    private void onMainMenuPlayButtonPressed() {
+    void onMainMenuPlayButtonPressed() {
         startGame();
     }
 }
