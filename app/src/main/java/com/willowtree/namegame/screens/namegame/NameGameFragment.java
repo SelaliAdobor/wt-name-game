@@ -6,8 +6,10 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -89,6 +91,8 @@ public class NameGameFragment extends Fragment {
 
     @BindView(R.id.namegame_scoring_label)
     TextView scoreLabel;
+    @BindView(R.id.namegame_scoring_title)
+    TextView scoreTitle;
 
     @BindView(R.id.namegame_answering_correctNameTextView)
     TextView nameLabel;
@@ -130,15 +134,29 @@ public class NameGameFragment extends Fragment {
 
         boolean allAnswersCorrect = correctAnswers == totalAnswers;
 
-        String scoreLabel = allAnswersCorrect ?
+        String scoreLabelText = allAnswersCorrect ?
                 getResources().getString(R.string.namegame_scoring_guage_label_allCorrect) :
                 getResources().getQuantityString(R.plurals.namegame_scoring_guage_label, correctAnswers, correctAnswers, totalAnswers);
 
-        this.scoreLabel.setText(scoreLabel);
+        scoreLabel.setText(scoreLabelText);
+
+        float percentScore = (float) correctAnswers / totalAnswers;
+
+        @StringRes int scoreTitleResId;
+        if (allAnswersCorrect) {
+            scoreTitleResId = R.string.namegame_scoring_all_title;
+        } else if (percentScore > 0.4) {
+            scoreTitleResId = R.string.namegame_scoring_some_title;
+        } else {
+            scoreTitleResId = R.string.namegame_scoring_few_title;
+        }
+
+        scoreTitle.setText(scoreTitleResId);
 
         if (allAnswersCorrect) {
             startConfetti(); //Very important!!
         }
+
     }
 
     private void startConfetti() {
@@ -271,47 +289,71 @@ public class NameGameFragment extends Fragment {
                         .getById(answer.challenge().correctProfileId())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(correctProfile -> {
-                            ViewTarget target = new ViewTarget(recyclerBinder
-                                    .getComponentAt(profiles.indexOf(correctProfile))
-                                    .getLithoView());//Can't be null since the view had to be clicked
+                            recyclerBinder.scrollToPosition(profiles.indexOf(correctProfile), false);
 
-                            String styleTitle = answer.wasCorrect() ?
-                                    "Correct!" :
-                                    String.format("That's not %s...", correctProfile.getFirstName());
+                            //Post this since the RecyclerView update will be in the queue
+                            new Handler(Looper.getMainLooper())
+                                    .post(() ->
+                                            compositeDisposable.add(
+                                                    highlightAnswer(profiles, answer, correctProfile)
+                                                            .subscribe(() -> nameGameViewModel.addAnswer(answer))
+                                            )
+                                    );
 
-                            //Show the profile's bio if available, otherwise show their job title
-                            //If neither is available, just show their full name
-                            String styleContent = answer.wasCorrect() ?
-                                    correctProfile
-                                            .getBio()
-                                            .or(correctProfile::getJobTitle)
-                                            .map(bioOrJobTitle -> bioOrJobTitle + "\n —" + correctProfile.getFirstName())
-                                            .orElse(correctProfile.getFullName()) :
-                                    String.format("You selected %s", answer.guessedProfile().getFullName());
-
-                            @StyleRes int showcaseStyle = answer.wasCorrect() ?
-                                    R.style.CorrectAnswerShowcaseTheme :
-                                    R.style.WrongAnswerShowcaseTheme;
-                            TextPaint textPaint = new TextPaint();
-                            int color = ContextCompat.getColor(getActivity(), R.color.answer_showcase_content_text_color);
-                            textPaint.setColor(color);
-                            ShowcaseView showcaseView = new ShowcaseView.Builder(getActivity())
-                                    .setTarget(target)
-                                    .setContentTitle(styleTitle)
-                                    .setContentText(styleContent)
-                                    .hideOnTouchOutside()
-                                    .setStyle(showcaseStyle)
-                                    .setContentTextPaint(textPaint)
-                                    .build();
-
-                            showcaseView.setOnShowcaseEventListener(new SimpleShowcaseEventListener() {
-                                @Override
-                                public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-                                    nameGameViewModel.addAnswer(answer);
-                                }
-                            });
                         })
         );
+    }
+
+    private Completable highlightAnswer(List<Profile> profiles, Answer answer, Profile correctProfile) {
+        return Completable.create(emitter->{
+            LithoView profileView = recyclerBinder
+                    .getComponentAt(profiles.indexOf(correctProfile))
+                    .getLithoView();
+
+            if (profileView == null) {
+                Timber.w("Recycler took unexpected amount of time to update");
+                emitter.onComplete();
+                return;
+            }
+
+            ViewTarget target = new ViewTarget(profileView);
+
+            String styleTitle = answer.wasCorrect() ?
+                    "Correct!" :
+                    String.format("That's not %s...", correctProfile.getFirstName());
+
+            //Show the profile's bio if available, otherwise show their job title
+            //If neither is available, just show their full name
+            String styleContent = answer.wasCorrect() ?
+                    correctProfile
+                            .getBio()
+                            .or(correctProfile::getJobTitle)
+                            .map(bioOrJobTitle -> bioOrJobTitle + "\n —" + correctProfile.getFirstName())
+                            .orElse(correctProfile.getFullName()) :
+                    String.format("You selected %s", answer.guessedProfile().getFullName());
+
+            @StyleRes int showcaseStyle = answer.wasCorrect() ?
+                    R.style.CorrectAnswerShowcaseTheme :
+                    R.style.WrongAnswerShowcaseTheme;
+            TextPaint textPaint = new TextPaint();
+            int color = ContextCompat.getColor(getActivity(), R.color.answer_showcase_content_text_color);
+            textPaint.setColor(color);
+            ShowcaseView showcaseView = new ShowcaseView.Builder(getActivity())
+                    .setTarget(target)
+                    .setContentTitle(styleTitle)
+                    .setContentText(styleContent)
+                    .hideOnTouchOutside()
+                    .setStyle(showcaseStyle)
+                    .setContentTextPaint(textPaint)
+                    .build();
+
+            showcaseView.setOnShowcaseEventListener(new SimpleShowcaseEventListener() {
+                @Override
+                public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                    emitter.onComplete();
+                }
+            });
+        });
     }
 
     private void renderLoading() {
