@@ -3,30 +3,22 @@ package com.willowtree.namegame.screens.gamedata;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 
-import com.willowtree.namegame.api.profiles.Profile;
 import com.willowtree.namegame.application.NameGameApplication;
 import com.willowtree.namegame.profiles.ProfileRepository;
 import com.willowtree.namegame.profiles.ProfileSource;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
 import io.reactivex.disposables.Disposable;
-import io.realm.Realm;
 import timber.log.Timber;
 
 public class GameDataViewModel extends AndroidViewModel {
 
     private Disposable loadingDisposable;
-
 
 
     @Inject

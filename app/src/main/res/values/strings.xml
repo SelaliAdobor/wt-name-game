@@ -3,4 +3,14 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="namegame_scoring_guage_label">You got %d answers out of %d</string>
+    <plurals name="namegame_scoring_guage_label">
+        <item quantity="one">You got 1 name right...</item>
+        <item quantity="other">You got %d answers out of %d right</item>
+    </plurals>
+    <string name="namegame_scoring_guage_none_label">You didn\'t get any names right... play some more!</string>
+    <string name="namegame_scoring_guage_label_allCorrect">You got all the names right!</string>
+    <string name="namegame_scoring_few_title">You must be that new Android developer...</string>
+    <string name="namegame_scoring_some_title"> Not Bad!</string>
+    <string name="namegame_scoring_all_title">Awesome!</string>
 </resources>

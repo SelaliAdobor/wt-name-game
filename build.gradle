@@ -8,9 +8,10 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.2.0-alpha18'
         classpath 'com.squareup.sqldelight:gradle-plugin:0.6.1'
         classpath 'io.realm:realm-gradle-plugin:5.3.0'
+        classpath 'android.arch.navigation:navigation-safe-args-gradle-plugin:1.0.0-alpha02'
     }
 }
 

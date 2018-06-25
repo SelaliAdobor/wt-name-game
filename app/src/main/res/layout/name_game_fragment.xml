@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".screens.namegame.NameGameFragment">
+
+    <include
+        android:id="@+id/namegame_loading_content"
+        layout="@layout/name_game_loading" />
+
+    <include
+        android:id="@+id/namegame_answering_content"
+        layout="@layout/name_game_answering" />
+
+    <include
+        android:id="@+id/namegame_scoring_content"
+        layout="@layout/name_game_scoring" />
+
+
+</FrameLayout>

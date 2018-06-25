@@ -23,5 +23,21 @@
             android:id="@+id/action_goToGameDataLoadFromMainMenu"
             app:destination="@id/gameDataFragment"
             app:launchSingleTop="true"/>
+        <action
+            android:id="@+id/action_mainMenuToMainGame"
+            app:destination="@id/mainGameFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/mainGameFragment"
+        android:name="com.willowtree.namegame.screens.namegame.NameGameFragment"
+        android:label="main_game_fragment"
+        tools:layout="@layout/name_game_fragment" >
+        <action
+            android:id="@+id/action_mainGameToMainMenu"
+            app:destination="@id/mainMenuFragment" />
+        <argument android:name="game" />
+        <action
+            android:id="@+id/action_playMainGameAgain"
+            app:destination="@id/mainGameFragment" />
     </fragment>
 </navigation>

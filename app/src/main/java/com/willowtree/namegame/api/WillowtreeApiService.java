@@ -9,6 +9,6 @@ import retrofit2.http.GET;
 
 
 public interface WillowtreeApiService {
-        @GET("api/v1.0/profiles")
-        Single<List<Profile>> fetchAllProfiles();
+    @GET("api/v1.0/profiles")
+    Single<List<Profile>> fetchAllProfiles();
 }
