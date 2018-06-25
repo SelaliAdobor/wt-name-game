@@ -8,13 +8,16 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.facebook.litho.Component;
 import com.facebook.litho.ComponentContext;
 import com.facebook.litho.LithoView;
+import com.facebook.litho.widget.ComponentRenderInfo;
 import com.facebook.litho.widget.GridLayoutInfo;
 import com.facebook.litho.widget.Recycler;
 import com.facebook.litho.widget.RecyclerBinder;
+import com.facebook.litho.widget.RenderInfo;
 import com.github.anastr.speedviewlib.SpeedView;
 import com.willowtree.namegame.R;
 import com.willowtree.namegame.api.profiles.Profile;
@@ -27,7 +30,9 @@ import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import java9.util.Lists;
 import java9.util.stream.Collectors;
 
 import androidx.navigation.fragment.NavHostFragment;
@@ -35,6 +40,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import nl.dionsegijn.konfetti.KonfettiView;
+import nl.dionsegijn.konfetti.models.Shape;
+import nl.dionsegijn.konfetti.models.Size;
 import timber.log.Timber;
 
 import static java9.util.stream.StreamSupport.stream;
@@ -61,6 +69,12 @@ public class NameGameFragment extends Fragment {
     @BindView(R.id.namegame_answering_lithoView)
     LithoView lithoView;
 
+    @BindView(R.id.namegame_scoring_label)
+    TextView scoreLabel;
+
+    @BindView(R.id.namegame_scoring_konfettiView)
+    KonfettiView konfettiView;
+
     CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     public NameGameFragment() {
@@ -83,7 +97,7 @@ public class NameGameFragment extends Fragment {
 
     private void renderScoring(Game game) {
         int totalAnswers = game.answers().size();
-        long correctAnswers = stream(game.answers())
+        int correctAnswers = (int) stream(game.answers())
                 .filter(Answer::wasCorrect)
                 .count();
 
@@ -92,8 +106,34 @@ public class NameGameFragment extends Fragment {
 
         scoreView.speedTo(correctAnswers);
 
-        String unitText = String.format(Locale.US, "answers out of %d", correctAnswers);
-        scoreView.setUnit(unitText);
+        boolean allAnswersCorrect = correctAnswers == totalAnswers;
+
+        String scoreLabel = allAnswersCorrect ?
+                getResources().getString(R.string.namegame_scoring_guage_label_allCorrect) :
+                getResources().getQuantityString(R.plurals.namegame_scoring_guage_label, correctAnswers, correctAnswers, totalAnswers);
+
+        this.scoreLabel.setText(scoreLabel);
+
+        if (allAnswersCorrect) {
+            startConfetti();
+        }
+    }
+
+    private void startConfetti() {
+        List<Integer> confettiColors = stream(Lists.of(R.color.confetti_yellow, R.color.confetti_orange, R.color.confetti_purple, R.color.confetti_pink))
+                .map(colorId -> getResources().getColor(colorId))
+                .collect(Collectors.toList());
+
+        konfettiView.build()
+                .addColors(confettiColors)
+                .setDirection(0.0, 359.0)
+                .setSpeed(1f, 5f)
+                .setFadeOutEnabled(true)
+                .setTimeToLive(2000L)
+                .addShapes(Shape.RECT, Shape.CIRCLE)
+                .addSizes(new Size(12, 5))
+                .setPosition(konfettiView.getX() + konfettiView.getWidth() / 2, konfettiView.getY() + konfettiView.getHeight() / 3)
+                .streamFor(300, 10000L);
     }
 
     private void renderGame(Game game) {
@@ -143,12 +183,13 @@ public class NameGameFragment extends Fragment {
     }
 
     private void updateRecyclerContent(RecyclerBinder recyclerBinder, ComponentContext componentContext, Challenge challenge) {
-        List<Component> listItems = new ArrayList<>();
+        List<RenderInfo> listItems = new ArrayList<>();
         compositeDisposable.add(
                 Single.merge(stream(challenge.profileIds())
                         .map(profileId -> nameGameViewModel.profileRepository.getById(profileId))
                         .collect(Collectors.toList()))
                         .collectInto(new ArrayList<Profile>(), ArrayList::add)
+                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribe((profiles) -> {
                             for (Profile profile : profiles) {
 
@@ -158,13 +199,15 @@ public class NameGameFragment extends Fragment {
                                         .clickEventHandler(() -> handleAnswer(profile, challenge))
                                         .build();
 
-                                listItems.add(layoutComponent);
+                                listItems.add(ComponentRenderInfo
+                                        .create()
+                                        .component(layoutComponent)
+                                        .build()
+                                );
                             }
 
                             recyclerBinder.removeRangeAt(0, recyclerBinder.getItemCount());
-                            for (int i = 0; i < listItems.size(); i++) {
-                                recyclerBinder.insertItemAt(i, listItems.get(i));
-                            }
+                            recyclerBinder.insertRangeAt(0, listItems);
                         })
         );
     }

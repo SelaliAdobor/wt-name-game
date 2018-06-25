@@ -3,4 +3,9 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="confetti_yellow">#fce18a</color>
+    <color name="confetti_orange">#ff726d</color>
+    <color name="confetti_purple">#b48def</color>
+    <color name="confetti_pink">#f4306d</color>
+    <color name="score_gauge_color">#78866B</color>
 </resources>
