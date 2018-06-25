@@ -31,8 +31,10 @@ public class ProfileLayoutSpec {
                 .child(
                         PicassoImage.create(c)
                                 .imageUrl(profile.getHeadshot().get().getSanitizedUrl().get()) //TODO: Expose as top level property if used in more locations
-                                .errorDrawableRes(R.drawable.unloaded_profile_image)
-                                .placeholderImageRes(R.drawable.unloaded_profile_image)
+                                .errorDrawableRes(R.drawable.failed_load_profile_image)
+                                .fit(true)
+                                .centerCrop(true)
+                                .placeholderImageRes(R.drawable.loading_profile_image)
                 )
                 .clickHandler(ProfileLayout.onClick(c))
                 .build();
