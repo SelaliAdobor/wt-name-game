@@ -48,38 +48,40 @@ public class NameGameViewModel extends AndroidViewModel {
 
     private void setupState() {
         stateData.observeForever(state -> {
-            Timber.i("State changed, State: %s Game: %s", state, getCurrentGame());
+            Timber.i("State changed, State: %s Game: %s", state, getGame().getValue());
         });
 
         gameData.observeForever(game -> {
-            Timber.i("Game changed, State: %s Game: %s", getCurrentState(), game);
-            if (game.isFinished() && getCurrentState() == State.ANSWERING) {
-                stateData.postValue(State.SCORING);
-            }
+            Timber.i("Game changed, State: %s Game: %s", getCurrentState().orElse(null), game);
         });
     }
 
-    public void goToLoadState() {
-        if(getCurrentState() != null){
+    private void goToLoadState() {
+        if (getCurrentState().isPresent()) {
             Timber.w("Not going to LOADING state due to existing state data");
             return;
         }
         stateData.setValue(State.LOADING);
 
         lifecycleDisposables.add(
-                Completable.merge(getHeadshotCompletables(getCurrentGame()))
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(() -> stateData.postValue(State.ANSWERING))
+                //Attempt to fetch all the completables, if it takes longer than 10 seconds move ahead with the game
+                //Since the fetch operation only primes the cache, it's ok for the game to start
+                Completable.ambArray(
+                        Completable.merge(getHeadshotCompletables(getCurrentGame())),
+                        Completable.complete().delay(10, TimeUnit.SECONDS)
+                )
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> stateData.postValue(State.ANSWERING))
         );
     }
 
     private List<Completable> getHeadshotCompletables(Game game) {
         return stream(game.challenges())
-                .map(Challenge::profileIds)
-                .flatMap(StreamSupport::stream)
-                .map(profileIds -> profileRepository.getById(profileIds))
+                .map(Challenge::profileIds) //Get all the profileIds in one Challenge
+                .flatMap(StreamSupport::stream) //Merge all profileIds in all Challenges into one stream
+                .map(profileIds -> profileRepository.getById(profileIds)) //For each profileIds in the stream, get a Single that returns the Profile represented
                 .map(profileSingle ->
-                        profileSingle.flatMapCompletable(profile -> {
+                        profileSingle.flatMapCompletable(profile -> {  //Map the Profiles to fetch operations
                             Optional<Headshot> headshot = profile.getHeadshot();
                             if (headshot.isPresent() && headshot.get().getSanitizedUrl().isPresent()) {
                                 return Completable.create((emitter) ->
@@ -119,17 +121,29 @@ public class NameGameViewModel extends AndroidViewModel {
     public LiveData<State> getState() {
         return stateData;
     }
-    public State getCurrentState() {
-        return stateData.getValue();
+
+    public Optional<State> getCurrentState() {
+        return Optional.ofNullable(stateData.getValue());
     }
-    public void setInitalGameData(Game game) {
+
+    public void setInitialGameDataAndState(Game game) {
         if (gameData.getValue() == null) {
-            gameData.setValue(game);
+            updateGame(game);
+            if(!game.isFinished()){
+                goToLoadState();
+                gameData.observeForever(currentGame ->{
+                    if(currentGame.isFinished()){
+                        stateData.setValue(State.SCORING);
+                    }
+                });
+            }else{
+                stateData.setValue(State.SCORING);
+            }
         }
     }
 
     public void updateGame(Game game) {
-        gameData.postValue(game);
+        gameData.setValue(game);
     }
 
     public LiveData<Game> getGame() {

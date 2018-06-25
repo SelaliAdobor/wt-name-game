@@ -58,16 +58,21 @@ import timber.log.Timber;
 import static java9.util.stream.StreamSupport.stream;
 
 public class NameGameFragment extends Fragment {
+    public static final String ARGUMENTS_GAME_KEY = "game_key";
     Unbinder unbinder;
 
-    public static final String ARGUMENTS_GAME_KEY = "game_key";
-    private NameGameViewModel nameGameViewModel;
+
+    @BindView(R.id.namegame_loading_content)
+    View loadingContent;
 
     @BindView(R.id.namegame_answering_content)
     View answeringContent;
 
-    @BindView(R.id.namegame_loading_content)
-    View loadingContent;
+    @BindView(R.id.namegame_answering_lithoView)
+    LithoView lithoView;
+
+    @BindView(R.id.namegame_answering_correctNameTextView)
+    TextView nameLabel;
 
     @BindView(R.id.namegame_scoring_content)
     View scoringContent;
@@ -75,26 +80,26 @@ public class NameGameFragment extends Fragment {
     @BindView(R.id.namegame_scoring_speedView)
     Speedometer scoreView;
 
-    @BindView(R.id.namegame_answering_lithoView)
-    LithoView lithoView;
-
     @BindView(R.id.namegame_scoring_label)
     TextView scoreLabel;
+
     @BindView(R.id.namegame_scoring_title)
     TextView scoreTitle;
-
-    @BindView(R.id.namegame_answering_correctNameTextView)
-    TextView nameLabel;
 
     @BindView(R.id.namegame_scoring_konfettiView)
     KonfettiView konfettiView;
 
     CompositeDisposable compositeDisposable = new CompositeDisposable();
 
+    RecyclerBinder recyclerBinder;
+    Recycler recyclerComponent;
+    ComponentContext componentContext;
+
+    private NameGameViewModel nameGameViewModel;
+
     public NameGameFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -175,31 +180,29 @@ public class NameGameFragment extends Fragment {
     }
 
     private void renderGame(Game game) {
-        switch (nameGameViewModel.getCurrentState()) {
-            case LOADING:
-                loadingContent.setVisibility(View.VISIBLE);
-                answeringContent.setVisibility(View.GONE);
-                scoringContent.setVisibility(View.GONE);
-                renderLoading();
-                break;
-            case ANSWERING:
-                loadingContent.setVisibility(View.GONE);
-                answeringContent.setVisibility(View.VISIBLE);
-                scoringContent.setVisibility(View.GONE);
-                renderAnswering(game);
-                break;
-            case SCORING:
-                loadingContent.setVisibility(View.GONE);
-                answeringContent.setVisibility(View.GONE);
-                scoringContent.setVisibility(View.VISIBLE);
-                renderScoring(game);
-                break;
-        }
+        nameGameViewModel.getCurrentState().ifPresent(state -> {
+            switch (state) {
+                case LOADING:
+                    loadingContent.setVisibility(View.VISIBLE);
+                    answeringContent.setVisibility(View.GONE);
+                    scoringContent.setVisibility(View.GONE);
+                    renderLoading();
+                    break;
+                case ANSWERING:
+                    loadingContent.setVisibility(View.GONE);
+                    answeringContent.setVisibility(View.VISIBLE);
+                    scoringContent.setVisibility(View.GONE);
+                    renderAnswering(game);
+                    break;
+                case SCORING:
+                    loadingContent.setVisibility(View.GONE);
+                    answeringContent.setVisibility(View.GONE);
+                    scoringContent.setVisibility(View.VISIBLE);
+                    renderScoring(game);
+                    break;
+            }
+        });
     }
-
-    RecyclerBinder recyclerBinder;
-    Recycler recyclerComponent;
-    ComponentContext componentContext;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -259,7 +262,7 @@ public class NameGameFragment extends Fragment {
                                             //We only want to be able to select an answer once per challenge
                                             //Because the AtomicBoolean is scoped outside of this loop, it acts as shared state between all the buttons shown
                                             if (!answerSelected.getAndSet(true)) {
-                                                handleAnswer(profiles, Answer.create(challenge, profile));
+                                                handleAnswer(profiles, profile, Answer.create(challenge, profile));
                                             }
                                         })
                                         .build();
@@ -281,7 +284,7 @@ public class NameGameFragment extends Fragment {
         );
     }
 
-    private void handleAnswer(List<Profile> profiles, Answer answer) {
+    private void handleAnswer(List<Profile> profiles, Profile selectedProfile, Answer answer) {
         compositeDisposable.add(
                 nameGameViewModel.profileRepository
                         .getById(answer.challenge().correctProfileId())
@@ -293,7 +296,7 @@ public class NameGameFragment extends Fragment {
                             new Handler(Looper.getMainLooper())
                                     .post(() ->
                                             compositeDisposable.add(
-                                                    highlightAnswer(profiles, answer, correctProfile)
+                                                    highlightAnswer(profiles, answer, selectedProfile, correctProfile)
                                                             .subscribe(() -> nameGameViewModel.addAnswer(answer))
                                             )
                                     );
@@ -302,7 +305,7 @@ public class NameGameFragment extends Fragment {
         );
     }
 
-    private Completable highlightAnswer(List<Profile> profiles, Answer answer, Profile correctProfile) {
+    private Completable highlightAnswer(List<Profile> profiles, Answer answer, Profile selectedProfile, Profile correctProfile) {
         return Completable.create(emitter -> {
             LithoView profileView = recyclerBinder
                     .getComponentAt(profiles.indexOf(correctProfile))
@@ -328,14 +331,17 @@ public class NameGameFragment extends Fragment {
                             .or(correctProfile::getJobTitle)
                             .map(bioOrJobTitle -> bioOrJobTitle + "\n —" + correctProfile.getFirstName())
                             .orElse(correctProfile.getFullName()) :
-                    String.format("You selected %s", answer.guessedProfile().getFullName());
+                    String.format("You selected %s", selectedProfile.getFullName());
 
             @StyleRes int showcaseStyle = answer.wasCorrect() ?
                     R.style.CorrectAnswerShowcaseTheme :
                     R.style.WrongAnswerShowcaseTheme;
+
             TextPaint textPaint = new TextPaint();
+
             int color = ContextCompat.getColor(getActivity(), R.color.answer_showcase_content_text_color);
             textPaint.setColor(color);
+
             ShowcaseView showcaseView = new ShowcaseView.Builder(getActivity())
                     .setTarget(target)
                     .setContentTitle(styleTitle)
@@ -366,6 +372,15 @@ public class NameGameFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //By saving the current Game object, the game can resume from Activity destruction
+        //The state of the game is not restored because we want the images to load again if needed
+        //The cache will make loading quick if most of the images were already loaded
+        outState.putParcelable(ARGUMENTS_GAME_KEY, nameGameViewModel.getGame().getValue());
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 
         super.onActivityCreated(savedInstanceState);
@@ -374,7 +389,9 @@ public class NameGameFragment extends Fragment {
                 .of(this)
                 .get(NameGameViewModel.class);
 
-        Bundle arguments = getArguments();
+        Bundle arguments = savedInstanceState != null ?
+                savedInstanceState :
+                getArguments();
 
         if (arguments == null) {
             throw new IllegalStateException("Started NameGameFragment without arguments");
@@ -382,12 +399,12 @@ public class NameGameFragment extends Fragment {
 
         Game game = arguments.getParcelable(ARGUMENTS_GAME_KEY);
 
+
+
         //Update the screen when either the Game or State are changed
         nameGameViewModel.getGame().observe(this, this::renderGame);
         nameGameViewModel.getState().observe(this, state -> this.renderGame(nameGameViewModel.getGame().getValue()));
 
-        nameGameViewModel.setInitalGameData(game);
-
-        nameGameViewModel.goToLoadState();
+        nameGameViewModel.setInitialGameDataAndState(game);
     }
 }
