@@ -4,8 +4,6 @@ package com.willowtree.namegame.screens.mainmenu;
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -13,16 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.willowtree.namegame.R;
-import com.willowtree.namegame.screens.gamedata.GameDataViewModel;
 import com.willowtree.namegame.screens.namegame.NameGameFragment;
-import com.willowtree.namegame.screens.namegame.models.Game;
-
-import java.util.concurrent.TimeUnit;
 
 import androidx.navigation.fragment.NavHostFragment;
-import io.reactivex.Completable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 
 
 /**
@@ -66,7 +57,7 @@ public class MainMenuFragment extends Fragment {
     private void startGame() {
 
         //noinspection ResultOfMethodCallIgnored
-        mainMenuViewModel.getGame(5, 9)
+        mainMenuViewModel.getGame()
                 .subscribe(game -> {
                     Bundle bundle = new Bundle();
 

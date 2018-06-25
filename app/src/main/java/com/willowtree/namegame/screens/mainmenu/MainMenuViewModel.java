@@ -29,8 +29,8 @@ public class MainMenuViewModel extends AndroidViewModel {
     }
 
 
-    public Single<Game> getGame(int numberOfQuestions, int numberOfProfilesPerQuestion) {
-        return profileRepository.getGame(numberOfQuestions, numberOfProfilesPerQuestion);
+    public Single<Game> getGame() {
+        return profileRepository.getGame(5, 9);
     }
 }
 

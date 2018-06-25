@@ -36,5 +36,8 @@
             android:id="@+id/action_mainGameToMainMenu"
             app:destination="@id/mainMenuFragment" />
         <argument android:name="game" />
+        <action
+            android:id="@+id/action_playMainGameAgain"
+            app:destination="@id/mainGameFragment" />
     </fragment>
 </navigation>

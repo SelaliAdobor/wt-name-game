@@ -70,8 +70,8 @@ public class NameGameViewModel extends AndroidViewModel {
                         Completable.merge(getHeadshotCompletables(getCurrentGame())),
                         Completable.complete().delay(10, TimeUnit.SECONDS)
                 )
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(() -> stateData.postValue(State.ANSWERING))
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(() -> stateData.postValue(State.ANSWERING))
         );
     }
 
@@ -127,18 +127,24 @@ public class NameGameViewModel extends AndroidViewModel {
     }
 
     public void setInitialGameDataAndState(Game game) {
-        if (gameData.getValue() == null) {
+        setInitialGameDataAndState(game, false);
+    }
+
+    public void setInitialGameDataAndState(Game game, boolean forceNewGame) {
+        if (gameData.getValue() == null || forceNewGame) {
             updateGame(game);
-            if(!game.isFinished()){
+            if (!game.isFinished()) {
                 goToLoadState();
-                gameData.observeForever(currentGame ->{
-                    if(currentGame.isFinished()){
+                gameData.observeForever(currentGame -> {
+                    if (currentGame.isFinished()) {
                         stateData.setValue(State.SCORING);
                     }
                 });
-            }else{
+            } else {
                 stateData.setValue(State.SCORING);
             }
+        }else {
+            Timber.w("Ignoring call to set initial Game and State");
         }
     }
 

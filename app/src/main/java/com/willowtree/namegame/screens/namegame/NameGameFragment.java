@@ -371,6 +371,22 @@ public class NameGameFragment extends Fragment {
                 .navigate(R.id.action_mainGameToMainMenu);
     }
 
+    @OnClick(R.id.namegame_scoring_playAgainButton)
+    public void onClickPlayAgain() {
+
+        compositeDisposable.add(
+                nameGameViewModel.profileRepository.getGame(5, 9)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe((game, throwable) -> {
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable(ARGUMENTS_GAME_KEY,game);
+
+                            NavHostFragment
+                                    .findNavController(this)
+                                    .navigate(R.id.action_playMainGameAgain, bundle);
+                        }));
+    }
+
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -398,7 +414,6 @@ public class NameGameFragment extends Fragment {
         }
 
         Game game = arguments.getParcelable(ARGUMENTS_GAME_KEY);
-
 
 
         //Update the screen when either the Game or State are changed
